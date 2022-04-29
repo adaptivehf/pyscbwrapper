@@ -94,9 +94,9 @@ class SCB(object):
         """ Returns the data from the constructed query. """
         response = session.post(self.get_api_url().replace('__', '/'), json=self.query)
         if response.status_code != 200:
-            response = session.post(self.get_api_url(), json=self.query)
-        if response.status_code != 200:
             response = session.get(self.get_api_url().replace('__', '/'), json=self.query)
+        if response.status_code != 200:
+            response = session.post(self.get_api_url(), json=self.query)
         if response.status_code != 200:
             response = session.get(self.get_api_url(), json=self.query)
         if response.status_code == 200:
