@@ -29,7 +29,7 @@ class SCB(object):
         if len(self.ids[-1]) >= 3:
             try:
                 int(self.ids[-1][3])
-            except ValueError:
+            except Exception:
                 return self.url_out + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
         return self.url_out + '__'.join(self.ids)
 
@@ -80,6 +80,6 @@ class SCB(object):
 
     def get_data(self):
         """ Returns the data from the constructed query. """
-        response = session.post(self.url + '/'.join(self.ids), json = self.query)
+        response = session.post(self.get_url(), json = self.query)
         response_json = json.loads(response.content.decode('utf-8-sig'))
         return response_json
