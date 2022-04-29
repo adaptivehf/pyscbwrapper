@@ -30,8 +30,8 @@ class SCB(object):
             try:
                 int(self.ids[-1][3])
             except Exception:
-                return self.url_out + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
-        return self.url_out + '__'.join(self.ids)
+                return self.url + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
+        return self.url + '__'.join(self.ids)
 
     def get_variables(self):
         """ Returns a dictionary of variables and their ranges for the bottom node. """
