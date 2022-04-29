@@ -1,7 +1,9 @@
 from . import session
-from requests.exceptions import HTTPError
+from requests.exceptions import BaseHTTPError, HTTPError
 import json
 
+class TooManyRequestsError(BaseHTTPError):
+    pass
 
 class SCB(object):
     """ Version 0.1.1 """
@@ -106,5 +108,7 @@ class SCB(object):
             raise HTTPError('403 - Forbidden: Access is denied')
         elif response.status_code == 404:
             raise HTTPError('404 - Page not found')
+        elif response.status_code == 429:
+            raise TooManyRequestsError('429 - Too many requests')
         else:
-            raise HTTPError
+            raise HTTPError('Unknown error: ' + response.status_code)
