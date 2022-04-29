@@ -95,6 +95,10 @@ class SCB(object):
         response = session.post(self.get_api_url().replace('__', '/'), json=self.query)
         if response.status_code != 200:
             response = session.post(self.get_api_url(), json=self.query)
+        if response.status_code != 200:
+            response = session.get(self.get_api_url().replace('__', '/'), json=self.query)
+        if response.status_code != 200:
+            response = session.get(self.get_api_url(), json=self.query)
         if response.status_code == 200:
             response_json = json.loads(response.content.decode('utf-8-sig'))
             return response_json
