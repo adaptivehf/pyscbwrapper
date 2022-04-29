@@ -2,13 +2,15 @@ from . import session
 from requests.exceptions import HTTPError
 import json
 
+
 class SCB(object):
     """ Version 0.1.1 """
+
     def __init__(self, lang, *args):
         self.ids = list(args)
         self.url = 'https://api.scb.se/OV0104/v1/doris/{}/ssd/'.format(lang)
         self.url_out = 'http://www.statistikdatabasen.scb.se/pxweb/{}/ssd/START__'.format(lang)
-        self.query = {"query": [], 
+        self.query = {"query": [],
                       "response": {"format": "json"}
                       }
 
@@ -30,9 +32,9 @@ class SCB(object):
         if len(self.ids[-1]) >= 3:
             try:
                 int(self.ids[-1][3])
-            except Exception:
-                return self.url + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
-        return self.url + '__'.join(self.ids)
+            except ValueError:
+                return self.url_out + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
+        return self.url_out + '__'.join(self.ids)
 
     def get_variables(self):
         """ Returns a dictionary of variables and their ranges for the bottom node. """
@@ -52,7 +54,7 @@ class SCB(object):
 
     def clear_query(self):
         """ Clears the query. Mostly an internal function to use in others. """
-        self.query = {"query": [], 
+        self.query = {"query": [],
                       "response": {"format": "json"}
                       }
 
@@ -63,33 +65,42 @@ class SCB(object):
         variables = response['variables']
         for kwarg in kwargs:
             for var in variables:
-                if var["text"].replace(' ' , '') == kwarg:
+                if var["text"].replace(' ', '') == kwarg:
                     self.query["query"].append({
-                            "code": var['code'],
-                            "selection": {
-                                    "filter": "item",
-                                    "values": [var['values'][j] for j in \
-                                               range(len(var['values'])) if \
-                                               var['valueTexts'][j] in \
-                                               kwargs[kwarg]]
-                                    }
-                                })
+                        "code": var['code'],
+                        "selection": {
+                            "filter": "item",
+                            "values": [var['values'][j] for j in \
+                                       range(len(var['values'])) if \
+                                       var['valueTexts'][j] in \
+                                       kwargs[kwarg]]
+                        }
+                    })
 
     def get_query(self):
         """ Returns the current query. """
         return self.query
 
+    def get_api_url(self):
+        """ Returns the url to the current folder. """
+        if len(self.ids[-1]) >= 3:
+            try:
+                int(self.ids[-1][3])
+            except ValueError:
+                return self.url + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
+        return self.url + '__'.join(self.ids)
+
     def get_data(self):
         """ Returns the data from the constructed query. """
-        try:
-            response = session.post(self.get_url().replace('__','/').strip(), json = self.query)
-            if response.status_code == 403:
-                raise HTTPError('403 - Forbidden: Access is denied')
+        response = session.post(self.get_api_url().replace('__', '/'), json=self.query)
+        if response.status_code != 200:
+            response = session.post(self.get_api_url(), json=self.query)
+        if response.status_code == 200:
             response_json = json.loads(response.content.decode('utf-8-sig'))
             return response_json
-        except HTTPError as e:
-            raise e
-        except Exception:
-            response = session.post(self.get_url().strip(), json = self.query)
-            response_json = json.loads(response.content.decode('utf-8-sig'))
-            return response_json
+        elif response.status_code == 403:
+            raise HTTPError('403 - Forbidden: Access is denied')
+        elif response.status_code == 404:
+            raise HTTPError('404 - Page not found')
+        else:
+            raise HTTPError
