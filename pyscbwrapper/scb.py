@@ -80,6 +80,11 @@ class SCB(object):
 
     def get_data(self):
         """ Returns the data from the constructed query. """
-        response = session.post(self.get_url(), json = self.query)
-        response_json = json.loads(response.content.decode('utf-8-sig'))
-        return response_json
+        try:
+            response = session.post(self.get_url().replace('__','/'), json = self.query)
+            response_json = json.loads(response.content.decode('utf-8-sig'))
+            return response_json
+        except Exception:
+            response = session.post(self.get_url(), json = self.query)
+            response_json = json.loads(response.content.decode('utf-8-sig'))
+            return response_json
