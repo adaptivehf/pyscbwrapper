@@ -84,11 +84,11 @@ class SCB(object):
         try:
             response = session.post(self.get_url().replace('__','/').strip(), json = self.query)
             if response.status_code == 403:
-                raise HTTPError
+                raise HTTPError('403 - Forbidden: Access is denied')
             response_json = json.loads(response.content.decode('utf-8-sig'))
             return response_json
-        except HTTPError:
-            return None
+        except HTTPError as e:
+            raise e
         except Exception:
             response = session.post(self.get_url().strip(), json = self.query)
             response_json = json.loads(response.content.decode('utf-8-sig'))
