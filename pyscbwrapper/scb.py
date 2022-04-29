@@ -1,4 +1,5 @@
 from . import session
+from requests.exceptions import HTTPError
 import json
 
 class SCB(object):
@@ -82,8 +83,12 @@ class SCB(object):
         """ Returns the data from the constructed query. """
         try:
             response = session.post(self.get_url().replace('__','/').strip(), json = self.query)
+            if response.status_code == 403:
+                raise HTTPError
             response_json = json.loads(response.content.decode('utf-8-sig'))
             return response_json
+        except HTTPError:
+            return None
         except Exception:
             response = session.post(self.get_url().strip(), json = self.query)
             response_json = json.loads(response.content.decode('utf-8-sig'))
