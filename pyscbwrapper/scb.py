@@ -90,6 +90,8 @@ class SCB(object):
                 int(self.ids[-1][3])
             except ValueError:
                 return self.url + '__'.join(self.ids[:-1]) + '/' + self.ids[-1]
+            except Exception:
+                return self.url + '__'.join(self.ids)
         return self.url + '__'.join(self.ids)
 
     def get_data(self):
